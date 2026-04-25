@@ -4,10 +4,15 @@ import { eq } from "drizzle-orm"; // TODO: What is this
 import { NextRequest, NextResponse } from "next/server";
 
 
+type Props = {
+    params: Promise<{ id: string }>
+}
+
 // GET /api/patients/:id
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: Props) {
     try {
-        const patientId = parseInt(params.id, 10);
+        const {id} = await params;
+        const patientId = parseInt(id, 10);
         const [patient] = await db.select().from(patients).where(eq(patients.id, patientId)).limit(1);
 
         if (!patient) {
@@ -22,10 +27,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PUT /api/patients/:id
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: Props) {
     try {
         const body = await request.json();
-        const patientId = parseInt(params.id, 10);
+        const {id} = await params;
+        const patientId = parseInt(id, 10);
         const updatedPatient = await db.update(patients).set(body).where(eq(patients.id, patientId)).returning();
         return NextResponse.json(updatedPatient[0], { status: 200 });
     } catch (error) {
@@ -35,9 +41,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE /api/patients/:id
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: Props) {
     try {
-        const patientId = parseInt(params.id, 10);
+        const {id} = await params;
+        const patientId = parseInt(id, 10);
         await db.delete(patients).where(eq(patients.id, patientId));
         return NextResponse.json({ message: "Patient deleted successfully" }, { status: 200 });
     } catch (error) {
