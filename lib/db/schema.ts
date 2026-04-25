@@ -6,6 +6,9 @@ import { pgTable, serial, text, date, timestamp} from "drizzle-orm/pg-core"
 // Status (Maybe make it enum?)
 // Address
 
+export type Patient = typeof patients.$inferSelect;
+export type NewPatient = typeof patients.$inferInsert;
+
 export const patients = pgTable("patients",{
     id : serial('id').primaryKey(),
     firstName : text('first_name').notNull(),
