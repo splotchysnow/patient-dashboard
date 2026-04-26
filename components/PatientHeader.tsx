@@ -22,9 +22,9 @@ export default function PatientHeader({ patients }: Props) {
     // Each label should have a name, value and a color.
     const stats = [
         { label: "Total Patients", value: total, color: "bg-gray-100 text-gray-800" },
-        { label: "Active", value: active, color: "bg-green-100 text-green-800" },
         { label: "Inquiry", value: inquiry, color: "bg-yellow-100 text-yellow-800" },
         { label: "Onboarding", value: onboarding, color: "bg-blue-100 text-blue-800" },
+        { label: "Active", value: active, color: "bg-green-100 text-green-800" },
         { label: "Churned", value: churned, color: "bg-gray-100 text-gray-800" },
     ]
 

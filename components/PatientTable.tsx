@@ -2,7 +2,6 @@
 
 import { Patient } from "@/lib/db/schema"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Pencil, Trash2 } from "lucide-react"
 
 interface Props {
@@ -64,7 +63,18 @@ export default function PatientTable({ patients, statusColors, onEdit, onDelete,
                 </p>
               </td>
               <td className="px-6 py-4 text-gray-600 text-sm">
-                {patient.dateOfBirth}
+                {/* {patient.dateOfBirth} */}
+                {/* {new Date(patient.dateOfBirth).toLocaleDateString("en-US", {
+                  month: "short", day: "numeric", year: "numeric"
+                })}
+                 */}
+
+                {(() => {
+                  const dob = new Date(patient.dateOfBirth)
+                  const age = Math.floor((new Date().getTime() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25))
+                  return `${dob.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} (${age} yrs)`
+                })()}
+
               </td>
               <td className="px-6 py-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[patient.status]}`}>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef} from "react"
 import { Patient } from "@/lib/db/schema"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,17 +29,28 @@ export default function Home() {
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const [recentlyMovedKanban, setRecentlyMovedKanban] = useState<Set<number>>(new Set()) // Store the ID of the recently moved patient for visual feedback
+
   // Implementing sorting function here: state <> (default)
   const [sortField, setSortField] = useState<"firstName" | "lastName" | "dateOfBirth" | "status" | "address">("firstName")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
   const [confirmDelete, setConfirmDelete] = useState<number | null> (null) // if number(id) = delete, if null = no delete.
 
-  const fetchPatients = async () => {
-    setLoading(true)
+  const moveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Load the patients.
+  const fetchPatients = async (silent = false) => {
+    if (!silent) {
+      setLoading(true)
+    }
     const res = await fetch("/api/patients")
     const data = await res.json()
     setPatients(data)
-    setLoading(false)
+    // This line was giving bug because it resets the set after timeout.
+    // setRecentlyMovedKanban(new Set()) // Clear recently moved after fetching new data
+    if (!silent) {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -104,7 +115,16 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     })
-    fetchPatients()
+    setRecentlyMovedKanban(new Set([id]))
+    fetchPatients(true)
+    
+    // Clear any existing timeout before setting a new one
+    if (moveTimeoutRef.current) {
+      clearTimeout(moveTimeoutRef.current)
+    }
+    moveTimeoutRef.current = setTimeout(() => {
+      setRecentlyMovedKanban(new Set())
+    }, 3000)
   }
 
   const handleSave = () => {
@@ -199,6 +219,7 @@ export default function Home() {
             onEdit={handleEdit}
             onDelete={handleDeleteConfirm}
             onStatusChange={handleStatusChange}
+            recentlyMoved={recentlyMovedKanban}
           />
         )}
 
